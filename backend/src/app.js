@@ -147,6 +147,69 @@ if (!frontendPath) {
   }
 }
 
+// SOLUZIONE DEFINITIVA: Se non troviamo il frontend, serviamo una pagina HTML semplice
+// che carica il frontend da un CDN o mostra un messaggio di errore
+if (!frontendPath) {
+  console.log('   ⚠️  Frontend build not found - serving fallback HTML');
+  
+  // Servi una pagina HTML semplice che carica il frontend
+  app.get('/', (req, res) => {
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>TrentoEventi</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+          body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+          .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+          .header { text-align: center; margin-bottom: 30px; }
+          .header h1 { color: #333; margin: 0; }
+          .header p { color: #666; margin: 10px 0 0 0; }
+          .status { background: #e8f5e8; border: 1px solid #4caf50; color: #2e7d32; padding: 15px; border-radius: 5px; margin: 20px 0; }
+          .api-info { background: #f0f8ff; border: 1px solid #2196f3; color: #1565c0; padding: 15px; border-radius: 5px; margin: 20px 0; }
+          .btn { background: #2196f3; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; margin: 10px 5px; }
+          .btn:hover { background: #1976d2; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🏛️ TrentoEventi</h1>
+            <p>Scopri tutti gli eventi di Trento</p>
+          </div>
+          
+          <div class="status">
+            <h3>✅ Backend API Funzionante</h3>
+            <p>Il backend è attivo e l'API degli eventi funziona correttamente.</p>
+          </div>
+          
+          <div class="api-info">
+            <h3>🔗 API Endpoints Disponibili</h3>
+            <p><strong>Eventi:</strong> <a href="/api/events" target="_blank">/api/events</a></p>
+            <p><strong>Autenticazione:</strong> /api/auth/*</p>
+            <p><strong>Notifiche:</strong> /api/notifications/*</p>
+            <p><strong>Admin:</strong> /api/admin/*</p>
+          </div>
+          
+          <div style="text-align: center; margin-top: 30px;">
+            <a href="/api/events" class="btn" target="_blank">📋 Vedi Eventi (JSON)</a>
+            <a href="https://github.com/Bugnotti/TrentoEventi" class="btn" target="_blank">📁 Codice Sorgente</a>
+          </div>
+          
+          <div style="margin-top: 30px; padding: 15px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 5px; color: #856404;">
+            <h4>⚠️ Nota Tecnica</h4>
+            <p>Il frontend Vue.js non è stato trovato durante il deploy. L'API funziona perfettamente, ma l'interfaccia utente non è disponibile.</p>
+            <p><strong>Soluzione:</strong> Controlla la configurazione di build su Render.com o considera di deployare il frontend separatamente.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `);
+  });
+}
+
 if (frontendPath) {
   console.log(`📁 Frontend build found at: ${frontendPath}`);
 } else {
@@ -163,6 +226,7 @@ if (frontendPath) {
   app.use((req, res, next) => {
     // Skip API routes - let them be handled by the API middleware
     if (req.path.startsWith('/api')) {
+      console.log(`🔍 API route requested: ${req.path} - passing to API handlers`);
       return next();
     }
     
