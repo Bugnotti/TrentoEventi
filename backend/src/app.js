@@ -21,6 +21,12 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Debug middleware to track API requests
+app.use("/api", (req, res, next) => {
+  console.log(`🔍 API request: ${req.method} ${req.originalUrl}`);
+  next();
+});
+
 // API routes
 app.use("/api/events", eventRoutes);
 app.use("/api/auth", authRoutes);
@@ -46,6 +52,11 @@ const potentialPaths = [
   join(process.cwd(), 'frontend/dist'),
   join(process.cwd(), 'dist'),
   join(process.cwd(), '../frontend/dist'),
+  // Render.com specific paths based on cwd: /opt/render/project/src/backend
+  join(process.cwd(), '../../frontend/dist'),
+  join(process.cwd(), '../../../frontend/dist'),
+  join(process.cwd(), '../../dist'),
+  join(process.cwd(), '../../../dist'),
   // Current directory built-in scenarios
   join(process.cwd(), 'dist'),
   join(process.cwd(), 'frontend/dist'),
@@ -76,11 +87,15 @@ function findDistDirectory(startPath, maxDepth = 3, currentDepth = 0) {
 // Find the correct frontend build path
 let frontendPath = null;
 console.log('🔍 Searching for frontend build files...');
+console.log('   Current working directory:', process.cwd());
+console.log('   Backend source directory:', __dirname);
+
 for (const path of potentialPaths) {
   const exists = existsSync(path);
   console.log(`   Checking: ${path} - ${exists ? '✅ Found' : '❌ Not found'}`);
   if (exists && !frontendPath) {
     frontendPath = path;
+    console.log(`   ✅ Selected frontend path: ${frontendPath}`);
   }
 }
 
@@ -92,8 +107,20 @@ if (!frontendPath) {
     console.log(`   Found dist directory: ${path}`);
     if (!frontendPath && existsSync(join(path, 'index.html'))) {
       frontendPath = path;
+      console.log(`   ✅ Found frontend build at: ${frontendPath}`);
       break;
     }
+  }
+}
+
+// Additional fallback: check if frontend was built in the project root
+if (!frontendPath) {
+  console.log('   Checking project root for frontend build...');
+  const projectRoot = process.cwd().replace('/src/backend', '');
+  const rootDistPath = join(projectRoot, 'frontend/dist');
+  if (existsSync(rootDistPath) && existsSync(join(rootDistPath, 'index.html'))) {
+    frontendPath = rootDistPath;
+    console.log(`   ✅ Found frontend build at project root: ${frontendPath}`);
   }
 }
 
@@ -108,8 +135,14 @@ if (frontendPath) {
   // Serve static files from frontend build
   app.use(express.static(frontendPath));
   
-  // Catch-all handler: send back index.html file for any other route  
-  app.use((req, res) => {
+  // Catch-all handler: send back index.html file for any other route
+  // IMPORTANT: Only handle non-API routes here
+  app.use((req, res, next) => {
+    // Skip API routes - let them be handled by the API middleware
+    if (req.path.startsWith('/api')) {
+      return next();
+    }
+    
     const indexPath = join(frontendPath, 'index.html');
     console.log(`Serve index.html from: ${indexPath}`);
     res.sendFile(indexPath, (err) => {

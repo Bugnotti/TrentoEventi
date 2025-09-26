@@ -6,13 +6,15 @@ const router = express.Router();
 
 // GET tutti gli eventi approvati
 router.get("/", async (req, res) => {
+  console.log("🔍 GET /api/events - attempt to fetch events");
   try {
     const events = await Event.find({ approved: "approved" })
       .populate('reporter', 'username firstName lastName instagram')
       .sort({ date: 1 });
+    console.log(`✅ Found ${events.length} approved events`);
     res.json(events);
   } catch (err) {
-    console.error("Errore /api/events:", err);
+    console.error("❌ Errore /api/events:", err);
     res.status(500).json({ error: "Errore nel recupero eventi", details: err.message });
   }
 });
