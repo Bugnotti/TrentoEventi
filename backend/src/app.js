@@ -42,6 +42,8 @@ console.log('   Parent directory:', dirname(__dirname));
 
 // Define potential paths for the frontend build - check different deployment scenarios
 const potentialPaths = [
+  // Render.com specific path - this is where the frontend actually gets built!
+  join(process.cwd(), '../frontend/dist'),
   // Common monorepo structures
   join(__dirname, '../../frontend/dist'),
   join(__dirname, '../frontend/dist'),
@@ -124,6 +126,17 @@ if (!frontendPath) {
   }
 }
 
+// Final fallback: check the exact path where Render builds the frontend
+if (!frontendPath) {
+  console.log('   Checking Render.com specific frontend path...');
+  const renderFrontendPath = join(process.cwd(), '../frontend/dist');
+  console.log(`   Checking: ${renderFrontendPath}`);
+  if (existsSync(renderFrontendPath) && existsSync(join(renderFrontendPath, 'index.html'))) {
+    frontendPath = renderFrontendPath;
+    console.log(`   ✅ Found frontend build at Render path: ${frontendPath}`);
+  }
+}
+
 if (frontendPath) {
   console.log(`📁 Frontend build found at: ${frontendPath}`);
 } else {
@@ -168,7 +181,8 @@ if (frontendPath) {
       api: 'Available at /api/* routes',
       debug: {
         cwd: process.cwd(),
-        backend_path: __dirname
+        backend_path: __dirname,
+        potentialPaths: potentialPaths.slice(0, 5) // Show first 5 paths checked
       }
     });
   });
