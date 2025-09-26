@@ -2,7 +2,14 @@ import mongoose from "mongoose";
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI, {
+    const mongoURI = process.env.MONGO_URI || process.env.MONGODB_URI;
+    
+    if (!mongoURI) {
+      console.error("❌ MONGO_URI environment variable is not set");
+      process.exit(1);
+    }
+    
+    await mongoose.connect(mongoURI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
