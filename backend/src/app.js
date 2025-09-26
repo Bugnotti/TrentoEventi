@@ -120,9 +120,13 @@ if (!frontendPath) {
   console.log('   Checking project root for frontend build...');
   const projectRoot = process.cwd().replace('/src/backend', '');
   const rootDistPath = join(projectRoot, 'frontend/dist');
+  console.log(`   Checking project root: ${rootDistPath}`);
+  console.log(`   Project root exists: ${existsSync(rootDistPath)}`);
   if (existsSync(rootDistPath) && existsSync(join(rootDistPath, 'index.html'))) {
     frontendPath = rootDistPath;
     console.log(`   ✅ Found frontend build at project root: ${frontendPath}`);
+  } else {
+    console.log(`   ❌ Project root frontend not found at: ${rootDistPath}`);
   }
 }
 
@@ -131,9 +135,15 @@ if (!frontendPath) {
   console.log('   Checking Render.com specific frontend path...');
   const renderFrontendPath = join(process.cwd(), '../frontend/dist');
   console.log(`   Checking: ${renderFrontendPath}`);
+  console.log(`   Path exists: ${existsSync(renderFrontendPath)}`);
+  if (existsSync(renderFrontendPath)) {
+    console.log(`   Directory contents: ${readdirSync(renderFrontendPath).join(', ')}`);
+  }
   if (existsSync(renderFrontendPath) && existsSync(join(renderFrontendPath, 'index.html'))) {
     frontendPath = renderFrontendPath;
     console.log(`   ✅ Found frontend build at Render path: ${frontendPath}`);
+  } else {
+    console.log(`   ❌ Frontend build not found at: ${renderFrontendPath}`);
   }
 }
 
