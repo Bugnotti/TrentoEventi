@@ -3,8 +3,7 @@ import axios from "axios";
 import auth from "./auth";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "/api",
-  withCredentials: true,
+  baseURL: "https://trentoeventi.onrender.com/api",
 });
 
 api.interceptors.request.use(
