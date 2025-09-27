@@ -11,7 +11,7 @@
         @click.stop="openReporterInstagram"
         :title="'Clicca per vedere il profilo Instagram di ' + getReporterDisplayName()"
       >
-        {{ getReporterDisplayName() }}
+        📸 {{ getReporterDisplayName() }}
       </span>
       <span v-else class="reporter-name">
         {{ getReporterDisplayName() }}
@@ -54,8 +54,14 @@ const openEventInstagram = async () => {
 };
 
 const openReporterInstagram = () => {
-  if (props.event.reporterInstagram) {
+  // Controlla se l'utente ha un username Instagram nel suo profilo
+  if (props.event.reporter?.instagram?.username) {
     // Rimuovi @ se presente e aggiungi il link Instagram
+    const cleanHandle = props.event.reporter.instagram.username.replace('@', '');
+    const instagramUrl = `https://www.instagram.com/${cleanHandle}/`;
+    window.open(instagramUrl, '_blank');
+  } else if (props.event.reporterInstagram) {
+    // Fallback: usa il reporterInstagram dell'evento se disponibile
     const cleanHandle = props.event.reporterInstagram.replace('@', '');
     const instagramUrl = `https://www.instagram.com/${cleanHandle}/`;
     window.open(instagramUrl, '_blank');
@@ -74,10 +80,10 @@ const getReporterDisplayName = () => {
 const shouldShowInstagram = () => {
   // Mostra Instagram solo se:
   // 1. L'utente ha scelto di mostrare il suo profilo (showProfile: true)
-  // 2. Ha un username Instagram
-  // 3. C'è un reporterInstagram nell'evento
-  return props.event.reporter?.instagram?.showProfile && 
-         props.event.reporter?.instagram?.username && 
+  // 2. Ha un username Instagram nel suo profilo
+  // OPPURE se c'è un reporterInstagram nell'evento (fallback)
+  return (props.event.reporter?.instagram?.showProfile && 
+          props.event.reporter?.instagram?.username) ||
          props.event.reporterInstagram;
 };
 
@@ -133,14 +139,19 @@ p {
 }
 
 .reporter-name.clickable {
-  color: #007bff;
+  color: #e91e63;
   cursor: pointer;
-  text-decoration: underline;
-  transition: color 0.2s ease;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+  padding: 2px 4px;
+  background: rgba(233, 30, 99, 0.1);
 }
 
 .reporter-name.clickable:hover {
-  color: #0056b3;
-  text-decoration: none;
+  color: #ad1457;
+  background: rgba(233, 30, 99, 0.2);
+  transform: scale(1.05);
 }
 </style>

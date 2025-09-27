@@ -5,7 +5,7 @@
       <button 
         v-for="option in dateOptions" 
         :key="option" 
-        @click="$emit('update-date', option)" 
+        @click="handleDateClick(option)" 
         :class="['filter-btn', { active: option === selectedDate }]"
       >
         {{ option }}
@@ -33,8 +33,22 @@ const props = defineProps({
   }
 });
 
+const emit = defineEmits(['update-date', 'update-category', 'reset']);
+
 const dateOptions = ["Oggi", "Domani", "Venerdì", "Sabato"];
 const categories = props.categories;
+
+// Funzione per gestire il click sui filtri di data
+const handleDateClick = (option) => {
+  emit('update-date', option);
+  
+  // Aggiungi un feedback visivo al bottone cliccato
+  const button = event.target;
+  button.style.transform = 'scale(0.95)';
+  setTimeout(() => {
+    button.style.transform = 'scale(1)';
+  }, 150);
+};
 </script>
 <style scoped>
 .filters {
@@ -65,7 +79,8 @@ const categories = props.categories;
   color: #2563eb;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s ease;
+  transform: scale(1);
 }
 .filter-btn:hover,
 .filter-btn.active {
@@ -104,6 +119,10 @@ select:focus, input[type="date"]:focus {
     width: 100%; /* bottoni larghi quanto lo schermo */
     text-align: center;
     padding: 0.55rem 0.9rem;
+    font-weight: 600;
+  }
+  .filter-btn:hover {
+    transform: scale(0.98);
   }
   select, input[type="date"] {
     width: 100%;

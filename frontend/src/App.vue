@@ -92,8 +92,28 @@ onMounted(async () => {
   }
 });
 
-const setDate = (d) => (selectedDate.value = d);
+const setDate = (d) => {
+  selectedDate.value = d;
+  // Scroll automatico verso gli eventi in versione mobile
+  scrollToEvents();
+};
+
 const setCategory = (c) => (selectedCategory.value = c);
+
+// Funzione per scroll automatico verso gli eventi
+const scrollToEvents = () => {
+  // Aspetta che Vue abbia aggiornato il DOM
+  setTimeout(() => {
+    const eventsSection = document.getElementById('events');
+    if (eventsSection) {
+      // Scroll smooth verso la sezione eventi
+      eventsSection.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      });
+    }
+  }, 100);
+};
 
 function startOfLocalDay(date) {
   const d = new Date(date);
@@ -197,6 +217,8 @@ const resetFilters = () => {
   selectedDate.value = "";
   selectedCategory.value = "";
   currentPage.value = 1;
+  // Scroll automatico anche quando si resettano i filtri
+  scrollToEvents();
 };
 
 const showAddEvent = ref(false);
