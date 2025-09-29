@@ -12,12 +12,6 @@
               <span class="label">Nome:</span>
               <span class="value">{{ user?.firstName || 'Non specificato' }} {{ user?.lastName || '' }}</span>
             </div>
-            <div class="detail-item">
-              <span class="label">Eventi segnalati:</span>
-              <span class="value events-count" :class="{ 'events-updated': eventsUpdated }">
-                {{ eventsCount }} 📅
-              </span>
-            </div>
             <div class="detail-item" v-if="user?.instagram?.showProfile && user?.instagram?.username">
               <span class="label">Instagram:</span>
               <a :href="`https://instagram.com/${user.instagram.username}`" target="_blank" class="instagram-link">
@@ -89,100 +83,20 @@
         </form>
       </div>
 
-      <!-- Sezione Eventi dell'Utente -->
-      <div class="user-events-section">
-        <div class="section-header">
-          <h2>I Tuoi Eventi</h2>
-          <p>Gestisci gli eventi che hai segnalato</p>
-        </div>
-        
-        <div v-if="userEventsLoading" class="loading">
-          <p>Caricamento eventi...</p>
-        </div>
-        
-        <div v-else-if="userEvents.length === 0" class="no-events">
-          <div class="no-events-icon">📅</div>
-          <h3>Nessun evento segnalato</h3>
-          <p>Non hai ancora segnalato nessun evento. Vai alla home page per aggiungere il tuo primo evento!</p>
-        </div>
-        
-        <div v-else class="events-grid">
-          <div 
-            v-for="event in userEvents" 
-            :key="event._id" 
-            class="user-event-card"
-            :class="{ 'pending': event.approved === 'pending', 'approved': event.approved === 'approved', 'rejected': event.approved === 'rejected' }"
-          >
-            <div class="event-header">
-              <h3>{{ event.name }}</h3>
-              <div class="event-status">
-                <span v-if="event.approved === 'pending'" class="status-badge pending">
-                  ⏳ In attesa
-                </span>
-                <span v-else-if="event.approved === 'approved'" class="status-badge approved">
-                  ✅ Approvato
-                </span>
-                <span v-else-if="event.approved === 'rejected'" class="status-badge rejected">
-                  ❌ Rifiutato
-                </span>
-              </div>
-            </div>
-            
-            <div class="event-details">
-              <p class="event-date">📅 {{ formatDate(event.date) }}</p>
-              <p class="event-location">📍 {{ event.location }}</p>
-              <p class="event-category">🏷️ {{ event.category }}</p>
-              <p v-if="event.link" class="event-link">
-                🔗 <a :href="event.link" target="_blank">Vedi su Instagram</a>
-              </p>
-            </div>
-            
-            <div class="event-actions">
-              <button 
-                v-if="event.approved === 'pending'" 
-                @click="editEvent(event)"
-                class="btn edit-btn"
-              >
-                ✏️ Modifica
-              </button>
-              <span v-else class="action-disabled">
-                {{ event.approved === 'approved' ? 'Evento pubblicato' : 'Evento rifiutato' }}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
     
-    <!-- Edit Event Modal -->
-    <EditEventModal 
-      :show="showEditEventModal" 
-      :event="selectedEvent"
-      @close="showEditEventModal = false" 
-      @event-updated="refreshUserEvents" 
-    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted } from 'vue';
 import auth from '../services/auth';
-import api from '../services/api';
-import EditEventModal from '../components/EditEventModal.vue';
 
 const user = ref(auth.getUser());
 const loading = ref(false);
 const message = ref('');
 const isError = ref(false);
 const showEditForm = ref(false);
-const eventsUpdated = ref(false);
-const eventsCount = ref(0);
-
-// Nuove variabili per la gestione eventi
-const userEvents = ref([]);
-const userEventsLoading = ref(false);
-const showEditEventModal = ref(false);
-const selectedEvent = ref(null);
 
 const editForm = ref({
   firstName: '',
@@ -241,9 +155,6 @@ const updateProfile = async () => {
       user.value = refreshedUser;
     }
     
-    // Riconta gli eventi dopo l'aggiornamento
-    await countUserEvents();
-    
     // Chiudi il form dopo 2 secondi
     setTimeout(() => {
       showEditForm.value = false;
@@ -258,72 +169,6 @@ const updateProfile = async () => {
   }
 };
 
-// Funzione per contare gli eventi dell'utente
-const countUserEvents = async () => {
-  try {
-    if (!user.value?.username) return;
-    
-    const response = await api.get('/events');
-    const allEvents = response.data;
-    
-    // Conta gli eventi segnalati dall'utente corrente
-    const userEvents = allEvents.filter(event => 
-      event.reportedBy === user.value.username
-    );
-    
-    const oldCount = eventsCount.value;
-    eventsCount.value = userEvents.length;
-    
-    // Mostra animazione se il numero di eventi è aumentato
-    if (eventsCount.value > oldCount && oldCount > 0) {
-      eventsUpdated.value = true;
-      setTimeout(() => {
-        eventsUpdated.value = false;
-      }, 2000);
-    }
-  } catch (error) {
-    console.error('Errore conteggio eventi:', error);
-  }
-};
-
-// Funzione per caricare gli eventi dell'utente
-const loadUserEvents = async () => {
-  try {
-    userEventsLoading.value = true;
-    const response = await api.get('/events/my-events');
-    userEvents.value = response.data;
-  } catch (error) {
-    console.error('Errore caricamento eventi utente:', error);
-    userEvents.value = [];
-  } finally {
-    userEventsLoading.value = false;
-  }
-};
-
-// Funzione per aggiornare gli eventi dell'utente
-const refreshUserEvents = async () => {
-  await loadUserEvents();
-  await countUserEvents();
-};
-
-// Funzione per formattare la data
-const formatDate = (dateString) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('it-IT', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-};
-
-// Funzione per aprire il modal di modifica evento
-const editEvent = (event) => {
-  selectedEvent.value = event;
-  showEditEventModal.value = true;
-};
 
 onMounted(async () => {
   const refreshedUser = await auth.refreshUser();
@@ -331,20 +176,6 @@ onMounted(async () => {
     user.value = refreshedUser;
   }
   resetForm();
-  
-  // Carica gli eventi dell'utente
-  await loadUserEvents();
-  
-  // Conta gli eventi dell'utente
-  await countUserEvents();
-  
-  // Aggiorna il conteggio eventi ogni 30 secondi
-  const eventsInterval = setInterval(countUserEvents, 30000);
-  
-  // Pulisci l'intervallo quando il componente viene smontato
-  onBeforeUnmount(() => {
-    clearInterval(eventsInterval);
-  });
 });
 </script>
 
@@ -417,36 +248,6 @@ onMounted(async () => {
   color: #1f2937;
 }
 
-.events-count {
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-  color: white;
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  transition: all 0.3s ease;
-}
-
-.events-updated {
-  animation: eventsPulse 2s ease-in-out;
-  transform: scale(1.1);
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
-}
-
-@keyframes eventsPulse {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 0 0 rgba(59, 130, 246, 0.6);
-  }
-  50% {
-    transform: scale(1.15);
-    box-shadow: 0 0 25px rgba(59, 130, 246, 0.8);
-  }
-  100% {
-    transform: scale(1.1);
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
-  }
-}
 
 .instagram-link {
   color: #e1306c;
@@ -649,207 +450,4 @@ onMounted(async () => {
   }
 }
 
-/* Stili per la sezione eventi utente */
-.user-events-section {
-  background: white;
-  border-radius: 20px;
-  padding: 2rem;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
-}
-
-.section-header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.section-header h2 {
-  margin: 0 0 0.5rem 0;
-  color: #1f2937;
-  font-size: 1.8rem;
-  font-weight: 700;
-}
-
-.section-header p {
-  margin: 0;
-  color: #6b7280;
-  font-size: 1rem;
-}
-
-.loading {
-  text-align: center;
-  padding: 2rem;
-  color: #6b7280;
-}
-
-.no-events {
-  text-align: center;
-  padding: 3rem 2rem;
-  color: #6b7280;
-}
-
-.no-events-icon {
-  font-size: 4rem;
-  margin-bottom: 1rem;
-}
-
-.no-events h3 {
-  margin: 0 0 1rem 0;
-  color: #374151;
-  font-size: 1.5rem;
-}
-
-.no-events p {
-  margin: 0;
-  font-size: 1rem;
-  line-height: 1.6;
-}
-
-.events-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 1.5rem;
-  margin-top: 1.5rem;
-}
-
-.user-event-card {
-  background: #f8fafc;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 1.5rem;
-  transition: all 0.2s;
-}
-
-.user-event-card.pending {
-  border-color: #f59e0b;
-  background: #fefbf3;
-}
-
-.user-event-card.approved {
-  border-color: #10b981;
-  background: #f0fdf4;
-}
-
-.user-event-card.rejected {
-  border-color: #ef4444;
-  background: #fef2f2;
-}
-
-.user-event-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-}
-
-.event-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 1rem;
-}
-
-.event-header h3 {
-  margin: 0;
-  color: #1f2937;
-  font-size: 1.2rem;
-  font-weight: 600;
-  flex: 1;
-  margin-right: 1rem;
-}
-
-.event-status {
-  flex-shrink: 0;
-}
-
-.status-badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.status-badge.pending {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.status-badge.approved {
-  background: #d1fae5;
-  color: #065f46;
-}
-
-.status-badge.rejected {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-.event-details {
-  margin-bottom: 1rem;
-}
-
-.event-details p {
-  margin: 0 0 0.5rem 0;
-  color: #374151;
-  font-size: 0.9rem;
-}
-
-.event-details p:last-child {
-  margin-bottom: 0;
-}
-
-.event-link a {
-  color: #2563eb;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.event-link a:hover {
-  text-decoration: underline;
-}
-
-.event-actions {
-  text-align: center;
-  padding-top: 1rem;
-  border-top: 1px solid #e5e7eb;
-}
-
-.edit-btn {
-  background: #f59e0b;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 0.9rem;
-}
-
-.edit-btn:hover {
-  background: #d97706;
-  transform: translateY(-1px);
-}
-
-.action-disabled {
-  color: #6b7280;
-  font-size: 0.9rem;
-  font-style: italic;
-}
-
-@media (max-width: 768px) {
-  .events-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .event-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-  
-  .event-header h3 {
-    margin-right: 0;
-    margin-bottom: 0.5rem;
-  }
-}
 </style>

@@ -31,6 +31,9 @@
             <router-link to="/profile" class="dropdown-item" @click="closeDropdown">
               Profilo
             </router-link>
+            <router-link to="/my-events" class="dropdown-item" @click="closeDropdown">
+              📅 I Tuoi Eventi
+            </router-link>
             <router-link v-if="user.role === 'admin'" to="/admin" class="dropdown-item admin-dashboard" @click="closeDropdown">
               📊 Dashboard Admin
             </router-link>
@@ -85,6 +88,10 @@
             <router-link to="/profile" class="mobile-menu-item" @click="closeMobileMenu">
               <span class="icon">👤</span>
               <span>Profilo</span>
+            </router-link>
+            <router-link to="/my-events" class="mobile-menu-item" @click="closeMobileMenu">
+              <span class="icon">📅</span>
+              <span>I Tuoi Eventi</span>
             </router-link>
             <router-link v-if="user.role === 'admin'" to="/admin" class="mobile-menu-item" @click="closeMobileMenu">
               <span class="icon">📊</span>

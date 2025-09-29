@@ -344,5 +344,16 @@ const selectedDayLabel = computed(() => {
   .hero p { font-size: 0.95rem; }
   .events-grid { grid-template-columns: 1fr; padding: 0.8rem; gap: 0.8rem; }
   .pagination { padding: 0 1rem; }
+  
+  /* Evita overflow orizzontale su mobile */
+  body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+  
+  #app {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
 }
 </style>

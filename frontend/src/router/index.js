@@ -3,6 +3,7 @@ import Login from "../pages/Login.vue";
 import Register from "../pages/Register.vue";
 import MissionVision from "../pages/MissionVision.vue";
 import Profile from "../pages/Profile.vue";
+import MyEvents from "../pages/MyEvents.vue";
 import ReviewPage from "../pages/ReviewPage.vue";
 import Notifications from "../pages/Notifications.vue";
 import AdminDashboard from "../pages/AdminDashboard.vue";
@@ -13,6 +14,7 @@ const routes = [
   { path: "/register", component: Register },
   { path: "/mission-vision", component: MissionVision },
   { path: "/profile", component: Profile },
+  { path: "/my-events", component: MyEvents },
   { path: "/review", component: ReviewPage },
   { path: "/notifications", component: Notifications },
   { path: "/admin", component: AdminDashboard },

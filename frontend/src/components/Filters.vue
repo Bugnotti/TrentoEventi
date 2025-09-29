@@ -10,7 +10,14 @@
       >
         {{ option }}
       </button>
-      <input type="date" @change="$emit('update-date', $event.target.value)" />
+      <div class="date-picker-container">
+        <input 
+          id="date-input"
+          type="date" 
+          class="date-input"
+          @change="$emit('update-date', $event.target.value)" 
+        />
+      </div>
       <button class="filter-btn" @click="$emit('reset')">Reset filtri</button>
     </div>
 
@@ -103,11 +110,31 @@ select:focus, input[type="date"]:focus {
   border: 1px solid #2563eb;
 }
 
+/* Stili base per il date input - mantiene layout originale su desktop */
+.date-input {
+  padding: 0.5rem 0.7rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  background: white;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.date-input:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
 /* 🔹 Media query per mobile */
 @media (max-width: 600px) {
   .filters {
     flex-direction: column; /* impila i gruppi */
     align-items: flex-start;
+    margin: 0;
+    padding: 0.8rem;
+    box-sizing: border-box;
+    overflow-x: hidden;
   }
   .filter-group {
     flex-direction: column; /* Data e Categoria vanno in colonna */
@@ -124,7 +151,40 @@ select:focus, input[type="date"]:focus {
   .filter-btn:hover {
     transform: scale(0.98);
   }
-  select, input[type="date"] {
+  
+  /* Su mobile, aggiungi etichetta prima dell'input date */
+  .date-picker-container::before {
+    content: "📅 Scegli data specifica:";
+    display: block;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1f2937;
+    text-align: center;
+    margin-bottom: 0.5rem;
+    background: #f8fafc;
+    padding: 0.8rem;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+  }
+  
+  .date-picker-container {
+    width: calc(100% - 40px);
+    margin: 0 auto;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .date-input {
+    width: 100%;
+    padding: 0.8rem;
+    font-size: 1rem;
+    text-align: center;
+    border: 2px solid #2563eb;
+    border-radius: 6px;
+    background: white;
+  }
+  
+  select {
     width: 100%;
   }
 }
