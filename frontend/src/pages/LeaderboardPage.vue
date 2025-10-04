@@ -82,13 +82,20 @@
           <div class="cta-icon">🎯</div>
           <h3>Vuoi entrare in classifica?</h3>
           <p>Segnala eventi interessanti e contribuisci alla community di Trento!</p>
-          <router-link to="/" class="btn cta-btn">
+          <button class="btn cta-btn" @click="openAddEvent">
             <span class="icon">＋</span>
             Segnala un Evento
-          </router-link>
+          </button>
         </div>
       </div>
     </div>
+    
+    <!-- Add Event Modal -->
+    <AddEventModal 
+      :show="showAddEvent" 
+      @close="showAddEvent=false" 
+      @event-created="handleEventCreated" 
+    />
   </div>
 </template>
 
@@ -97,11 +104,13 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '../services/api';
 import auth from '../services/auth';
+import AddEventModal from '../components/AddEventModal.vue';
 
 const router = useRouter();
 const leaderboard = ref([]);
 const loading = ref(false);
 const error = ref(false);
+const showAddEvent = ref(false);
 
 const loadLeaderboard = async () => {
   try {
@@ -144,6 +153,12 @@ const isCurrentUser = (username) => {
 };
 
 const goBack = () => router.back();
+const openAddEvent = () => { showAddEvent.value = true; };
+
+const handleEventCreated = () => {
+  // Ricarica la leaderboard quando viene creato un nuovo evento
+  loadLeaderboard();
+};
 
 
 onMounted(() => {
@@ -454,7 +469,7 @@ onMounted(() => {
 }
 
 .cta-btn {
-  background: linear-gradient(135deg, #10b981, #059669);
+  background: linear-gradient(135deg, #22c55e, #16a34a);
   color: white;
   border: none;
   padding: 1rem 2rem;
@@ -466,11 +481,13 @@ onMounted(() => {
   align-items: center;
   gap: 0.5rem;
   transition: all 0.3s;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(34,197,94,0.35);
 }
 
 .cta-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 10px 25px rgba(34,197,94,0.45);
 }
 
 .cta-btn .icon {

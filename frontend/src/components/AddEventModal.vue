@@ -58,16 +58,10 @@
           </div>
           
           <div class="field">
-            <label>Link Instagram/Web dell'evento</label>
-            <input type="url" v-model="form.link" placeholder="https://instagram.com/p/..." />
+            <label>Link Instagram/Web dell'evento *</label>
+            <input type="url" v-model="form.link" required placeholder="https://instagram.com/p/..." />
           </div>
           
-          <div class="field info-field">
-            <div class="info-box">
-              <p><strong>Il tuo Instagram:</strong> {{ user?.instagram?.showProfile ? (user.instagram.username || 'Non impostato') : 'Nascosto' }}</p>
-              <small>Per modificare le tue impostazioni Instagram, vai nel tuo profilo</small>
-            </div>
-          </div>
           
           <div class="form-actions">
             <button type="button" class="btn secondary" @click="$emit('close')">
@@ -277,26 +271,6 @@ onBeforeUnmount(() => window.removeEventListener('auth-changed', handleAuthChang
   margin-top: 0.25rem;
 }
 
-.info-field {
-  margin: 1rem 0;
-}
-
-.info-box {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 1rem;
-}
-
-.info-box p {
-  margin: 0 0 0.5rem 0;
-  color: #374151;
-}
-
-.info-box small {
-  color: #6b7280;
-  font-size: 0.8rem;
-}
 
 .form-actions {
   display: flex;
