@@ -99,7 +99,7 @@ router.get("/leaderboard", async (req, res) => {
         }
       },
       {
-        $sort: { eventCount: -1 }
+        $sort: { approvedCount: -1 }
       },
       {
         $limit: 10

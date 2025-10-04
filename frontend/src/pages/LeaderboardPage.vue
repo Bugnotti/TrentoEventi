@@ -6,7 +6,7 @@
         <button class="back-btn" @click="goBack" aria-label="Torna indietro">←</button>
         <div class="header-content">
           <h1>🏆 Classifica Top 10</h1>
-          <p class="subtitle">I contributori più attivi della community di Trento</p>
+          <p class="subtitle">I contributori con più eventi pubblicati della community di Trento</p>
         </div>
       </div>
 
@@ -62,13 +62,10 @@
                     </a>
                     <span v-else class="username-text">{{ user.username }}</span>
                   </h4>
-                  <div class="stats">
-                    <span class="stat approved">✅ {{ user.approvedCount }} approvati</span>
-                  </div>
                 </div>
                 <div class="total-events">
-                  <span class="event-count">{{ user.eventCount }}</span>
-                  <span class="event-label">eventi</span>
+                  <span class="event-count">{{ user.approvedCount }}</span>
+                  <span class="event-label">pubblicati</span>
                 </div>
               </div>
             </div>
@@ -81,7 +78,7 @@
         <div class="cta-card">
           <div class="cta-icon">🎯</div>
           <h3>Vuoi entrare in classifica?</h3>
-          <p>Segnala eventi interessanti e contribuisci alla community di Trento!</p>
+          <p>Segnala eventi interessanti che verranno pubblicati e contribuisci alla community di Trento!</p>
           <button class="btn cta-btn" @click="openAddEvent">
             <span class="icon">＋</span>
             Segnala un Evento

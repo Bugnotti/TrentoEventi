@@ -26,7 +26,14 @@
       <h2>{{ selectedDayLabel }}</h2>
     </div>
 
-    <div id="events" class="events-grid">
+    <!-- Loading State -->
+    <div v-if="loading" class="loading-section">
+      <div class="loading-spinner"></div>
+      <p>Caricamento eventi...</p>
+    </div>
+
+    <!-- Events Grid -->
+    <div v-else id="events" class="events-grid">
       <EventCard 
         v-for="event in paginatedEvents" 
         :key="event.id" 
@@ -70,9 +77,11 @@ const pageSize = ref(8);
 const currentPage = ref(1);
 const events = ref([]);
 const availableCategories = ref([]);
+const loading = ref(true);
 
 onMounted(async () => {
   try {
+    loading.value = true;
     const res = await api.get("/events");
     // Normalizza id per v-for
     events.value = res.data.map(e => ({
@@ -100,6 +109,8 @@ onMounted(async () => {
       : finalCategories;
   } catch (err) {
     console.error("Errore caricamento eventi:", err);
+  } finally {
+    loading.value = false;
   }
 });
 
@@ -254,6 +265,7 @@ const closeUserProfile = () => {
 
 const refreshEvents = async () => {
   try {
+    loading.value = true;
     const res = await api.get("/events");
     events.value = res.data.map(e => ({
       ...e,
@@ -268,6 +280,8 @@ const refreshEvents = async () => {
       : baseCategories;
   } catch (err) {
     console.error("Errore refresh eventi:", err);
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -310,6 +324,28 @@ const selectedDayLabel = computed(() => {
   padding: 0.7rem 2rem;
   font-size: 1rem;
   border-radius: 30px;
+}
+
+/* Loading Styles */
+.loading-section {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #6b7280;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #e5e7eb;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .pagination {
@@ -357,6 +393,15 @@ const selectedDayLabel = computed(() => {
   .hero p { font-size: 0.95rem; }
   .events-grid { grid-template-columns: 1fr; padding: 0.8rem; gap: 0.8rem; }
   .pagination { padding: 0 1rem; }
+  
+  .loading-section {
+    padding: 3rem 1rem;
+  }
+  
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+  }
   
   /* Evita overflow orizzontale su mobile */
   body {
