@@ -21,10 +21,6 @@
       @update-category="setCategory" 
       @reset="(shouldScroll) => resetFilters(shouldScroll)"
     />
-    <!-- Debug temporaneo -->
-    <div style="font-size: 0.8rem; color: #666; margin: 1rem; padding: 0.5rem; background: #f0f0f0; border-radius: 4px;">
-      Debug App: {{ availableCategories.length }} categorie disponibili
-    </div>
 
     <div class="selected-day" v-if="selectedDayLabel">
       <h2>{{ selectedDayLabel }}</h2>
@@ -83,15 +79,9 @@ onMounted(async () => {
       ...e,
       id: e._id || e.id
     }));
-    // Debug: vediamo cosa abbiamo caricato
-    console.log("Eventi caricati:", events.value.length);
-    console.log("Prime 3 categorie dagli eventi:", events.value.slice(0, 3).map(e => e.category));
-    
     // Deriva categorie uniche dal backend
     const set = new Set(events.value.map(e => e.category).filter(Boolean));
     const baseCategories = Array.from(set).sort();
-    
-    console.log("Categorie uniche trovate:", baseCategories);
     
     // Se non ci sono categorie dagli eventi, usa categorie di default
     const defaultCategories = [

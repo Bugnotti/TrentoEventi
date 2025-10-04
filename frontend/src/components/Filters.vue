@@ -22,15 +22,13 @@
     </div>
 
     <div class="filter-group">
-      <span>🔎 Categoria:</span>
-      <div class="category-filter-wrapper">
-        <select @change="$emit('update-category', $event.target.value)">
-          <option value="">Tutte le categorie</option>
-          <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
-        </select>
-        <!-- Debug temporaneo -->
-        <div style="font-size: 0.8rem; color: #666; margin-top: 0.5rem;">
-          Debug Filters: {{ categories.length }} categorie ricevute
+      <div class="category-filter-container">
+        <span class="category-label">🔎 Categoria:</span>
+        <div class="category-filter-wrapper">
+          <select @change="$emit('update-category', $event.target.value)">
+            <option value="">Tutte le categorie</option>
+            <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+          </select>
         </div>
       </div>
     </div>
@@ -38,7 +36,6 @@
 </template>
 
 <script setup>
-import { watch } from 'vue';
 
 const props = defineProps({
   selectedDate: String,
@@ -50,10 +47,6 @@ const props = defineProps({
 
 const emit = defineEmits(['update-date', 'update-category', 'reset']);
 
-// Debug: watch per vedere quando arrivano le categorie
-watch(() => props.categories, (newCategories) => {
-  console.log('Filters: categorie ricevute:', newCategories.length, newCategories);
-}, { immediate: true });
 
 const dateOptions = ["Oggi", "Domani", "Venerdì", "Sabato"];
 const categories = props.categories;
@@ -139,6 +132,29 @@ select:focus, input[type="date"]:focus {
   border-color: #2563eb;
 }
 
+/* Stili desktop per categoria */
+.category-filter-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.category-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0;
+  text-align: left;
+}
+
+.category-filter-wrapper {
+  background: transparent;
+  padding: 0;
+  border: none;
+  box-shadow: none;
+}
+
 /* 🔹 Media query per mobile */
 @media (max-width: 600px) {
   .filters {
@@ -212,10 +228,25 @@ select:focus, input[type="date"]:focus {
     border-color: #2563eb;
   }
   
+  .category-filter-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  
+  .category-label {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1f2937;
+    text-align: center;
+    margin-bottom: 0.3rem;
+  }
+  
   .category-filter-wrapper {
     background: #f8fafc;
     padding: 0.8rem;
-    border-radius: 8px;
+    border-radius: 12px;
     border: 1px solid #e5e7eb;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   }
