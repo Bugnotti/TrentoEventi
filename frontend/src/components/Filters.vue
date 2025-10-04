@@ -18,20 +18,28 @@
           @change="$emit('update-date', $event.target.value)" 
         />
       </div>
-      <button class="filter-btn" @click="$emit('reset')">Reset filtri</button>
+      <button class="filter-btn" @click="$emit('reset', true)">Reset filtri</button>
     </div>
 
     <div class="filter-group">
       <span>🔎 Categoria:</span>
-      <select @change="$emit('update-category', $event.target.value)">
-        <option value="">Tutte le categorie</option>
-        <option v-for="cat in categories" :key="cat">{{ cat }}</option>
-      </select>
+      <div class="category-filter-wrapper">
+        <select @change="$emit('update-category', $event.target.value)">
+          <option value="">Tutte le categorie</option>
+          <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+        </select>
+        <!-- Debug temporaneo -->
+        <div style="font-size: 0.8rem; color: #666; margin-top: 0.5rem;">
+          Debug Filters: {{ categories.length }} categorie ricevute
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import { watch } from 'vue';
+
 const props = defineProps({
   selectedDate: String,
   categories: {
@@ -41,6 +49,11 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['update-date', 'update-category', 'reset']);
+
+// Debug: watch per vedere quando arrivano le categorie
+watch(() => props.categories, (newCategories) => {
+  console.log('Filters: categorie ricevute:', newCategories.length, newCategories);
+}, { immediate: true });
 
 const dateOptions = ["Oggi", "Domani", "Venerdì", "Sabato"];
 const categories = props.categories;
@@ -186,6 +199,25 @@ select:focus, input[type="date"]:focus {
   
   select {
     width: 100%;
+    padding: 0.8rem;
+    font-size: 1rem;
+    border-radius: 10px;
+    border: 2px solid #cbd5e1;
+    background: white;
+    cursor: pointer;
+  }
+  
+  select:focus {
+    outline: none;
+    border-color: #2563eb;
+  }
+  
+  .category-filter-wrapper {
+    background: #f8fafc;
+    padding: 0.8rem;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   }
 }
 </style>

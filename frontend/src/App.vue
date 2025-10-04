@@ -14,12 +14,17 @@
       </div>
     </section>
     <Filters 
+      :key="`filters-${availableCategories.length}`"
       :selectedDate="selectedDate" 
       :categories="availableCategories"
       @update-date="setDate" 
       @update-category="setCategory" 
-      @reset="resetFilters"
+      @reset="(shouldScroll) => resetFilters(shouldScroll)"
     />
+    <!-- Debug temporaneo -->
+    <div style="font-size: 0.8rem; color: #666; margin: 1rem; padding: 0.5rem; background: #f0f0f0; border-radius: 4px;">
+      Debug App: {{ availableCategories.length }} categorie disponibili
+    </div>
 
     <div class="selected-day" v-if="selectedDayLabel">
       <h2>{{ selectedDayLabel }}</h2>
@@ -78,15 +83,31 @@ onMounted(async () => {
       ...e,
       id: e._id || e.id
     }));
+    // Debug: vediamo cosa abbiamo caricato
+    console.log("Eventi caricati:", events.value.length);
+    console.log("Prime 3 categorie dagli eventi:", events.value.slice(0, 3).map(e => e.category));
+    
     // Deriva categorie uniche dal backend
     const set = new Set(events.value.map(e => e.category).filter(Boolean));
     const baseCategories = Array.from(set).sort();
+    
+    console.log("Categorie uniche trovate:", baseCategories);
+    
+    // Se non ci sono categorie dagli eventi, usa categorie di default
+    const defaultCategories = [
+      "Musica", "Sport", "Cultura", "Shopping", "Gastronomia", 
+      "Cinema", "Cucina", "Fiere", "Intrattenimento", "Mostre", 
+      "Formazione", "DJ set", "Nightlife", "Discoteche"
+    ];
+    
+    const finalCategories = baseCategories.length > 0 ? baseCategories : defaultCategories;
+    
     // Aggiungi categoria combinata se presente una delle tre
     const nightlifeAliases = ["DJ set", "Nightlife", "Discoteche", "DJ set / Nightlife / Discoteche"];
-    const hasNightlife = baseCategories.some(c => nightlifeAliases.includes(c));
+    const hasNightlife = finalCategories.some(c => nightlifeAliases.includes(c));
     availableCategories.value = hasNightlife
-      ? [...baseCategories, "DJ set / Nightlife / Discoteche"]
-      : baseCategories;
+      ? [...finalCategories, "DJ set / Nightlife / Discoteche"]
+      : finalCategories;
   } catch (err) {
     console.error("Errore caricamento eventi:", err);
   }
@@ -213,12 +234,14 @@ const prevPage = () => { if (currentPage.value > 1) currentPage.value -= 1; };
 
 watch([selectedDate, selectedCategory], () => { currentPage.value = 1; });
 
-const resetFilters = () => {
+const resetFilters = (shouldScroll = true) => {
   selectedDate.value = "";
   selectedCategory.value = "";
   currentPage.value = 1;
-  // Scroll automatico anche quando si resettano i filtri
-  scrollToEvents();
+  // Scroll automatico solo se esplicitamente richiesto
+  if (shouldScroll) {
+    scrollToEvents();
+  }
 };
 
 const showAddEvent = ref(false);

@@ -51,6 +51,18 @@ async function upsertUsers() {
           username: "@laura_bianchi_events",
           showProfile: true
         }
+      },
+      {
+        email: "andrea.tabarelli@gmail.com",
+        passwordHash: await bcrypt.hash("andreatabarelli", 10),
+        username: "andrea_tabarelli",
+        firstName: "Andrea",
+        lastName: "Tabarelli",
+        role: "reviewer",
+        instagram: {
+          username: "@andrea_tabarelli",
+          showProfile: false
+        }
       }
     ];
 
