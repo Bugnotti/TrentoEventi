@@ -2,6 +2,19 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
 export const authenticateToken = (req, res, next) => {
+  // Modalità sviluppo: bypassa autenticazione se NODE_ENV è development
+  if (process.env.NODE_ENV === 'development' && req.headers['x-dev-bypass'] === 'true') {
+    // Crea un utente fittizio per i test
+    req.user = {
+      sub: '507f1f77bcf86cd799439011', // ID utente fittizio
+      userId: '507f1f77bcf86cd799439011',
+      username: 'testuser',
+      role: 'user'
+    };
+    console.log('🔧 DEV MODE: Bypassing authentication');
+    return next();
+  }
+
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 

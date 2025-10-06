@@ -14,7 +14,19 @@ const eventSchema = new mongoose.Schema({
   clickedBy: [{ 
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     clickedAt: { type: Date, default: Date.now }
-  }] // Array degli utenti che hanno cliccato e quando
+  }], // Array degli utenti che hanno cliccato e quando
+  
+  // Campi per gestire le modifiche in attesa di approvazione
+  pendingModifications: {
+    name: { type: String },
+    category: { type: String },
+    date: { type: Date },
+    location: { type: String },
+    link: { type: String },
+    requestedAt: { type: Date, default: Date.now },
+    requestedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+  },
+  hasPendingModifications: { type: Boolean, default: false }
 }, { timestamps: true });
 
 const Event = mongoose.model("Event", eventSchema);

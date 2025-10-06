@@ -1,8 +1,14 @@
 <template>
   <div class="event-card" @click="openEventInstagram">
-    <h3>{{ event.name }}</h3>
-    <p>📅 {{ new Date(event.date).toLocaleString() }}</p>
-    <p>📍 {{ event.location }}</p>
+    <h3 class="event-title">{{ event.name }}</h3>
+    <div class="event-date">
+      <span class="date-icon">📅</span>
+      <span class="date-text">
+        <span class="date-bold">{{ formatDate(event.date) }}</span>
+        <span class="date-time">{{ formatTime(event.date) }}</span>
+      </span>
+    </div>
+    <p class="event-location">📍 {{ event.location }}</p>
     <div class="reported-by">
       <span>Evento segnalato da</span>
       <span 
@@ -92,6 +98,23 @@ const showUserProfile = (username) => {
   console.log('User loggato:', user.value);
   emit('show-user-profile', username);
 };
+
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('it-IT', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  });
+};
+
+const formatTime = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleTimeString('it-IT', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
 </script>
 
 <style scoped>
@@ -110,14 +133,48 @@ const showUserProfile = (username) => {
   transform: translateY(-4px);
   box-shadow: 0 4px 16px rgba(0,0,0,0.1);
 }
-h3 {
-  margin: 0 0 0.5rem;
-  font-size: 1.1rem;
-  font-weight: 700;
+.event-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 800;
   color: #111827;
+  line-height: 1.3;
 }
-p {
-  margin: 0.3rem 0;
+
+.event-date {
+  margin: 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+.date-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.date-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.date-bold {
+  font-weight: 700;
+  color: #1f2937;
+  font-size: 0.95rem;
+}
+
+.date-time {
+  font-weight: 500;
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.event-location {
+  margin: 0.5rem 0;
   font-size: 0.9rem;
   color: #4b5563;
   display: flex;
@@ -153,5 +210,59 @@ p {
   color: #ad1457;
   background: rgba(233, 30, 99, 0.2);
   transform: scale(1.05);
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .event-title {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .event-date {
+    margin: 0.4rem 0;
+    gap: 0.4rem;
+  }
+  
+  .date-bold {
+    font-size: 0.9rem;
+  }
+  
+  .date-time {
+    font-size: 0.8rem;
+  }
+  
+  .event-location {
+    font-size: 0.85rem;
+    margin: 0.4rem 0;
+  }
+  
+  .reported-by {
+    font-size: 0.8rem;
+    margin: 0.4rem 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .event-card {
+    padding: 1rem;
+  }
+  
+  .event-title {
+    font-size: 1rem;
+    line-height: 1.2;
+  }
+  
+  .date-text {
+    gap: 0.05rem;
+  }
+  
+  .date-bold {
+    font-size: 0.85rem;
+  }
+  
+  .date-time {
+    font-size: 0.75rem;
+  }
 }
 </style>

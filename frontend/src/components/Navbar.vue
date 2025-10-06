@@ -24,25 +24,31 @@
       <template v-if="user">
         <div class="user-menu">
           <button class="user-button" @click="toggleDropdown">
-            {{ user.username }}
+            <div class="user-avatar-small">{{ getUserInitials() }}</div>
+            <span class="username-text">{{ user.username }}</span>
             <span class="dropdown-arrow" :class="{ 'open': showDropdown }">▼</span>
           </button>
           <div v-if="showDropdown" class="dropdown-menu">
             <router-link to="/profile" class="dropdown-item" @click="closeDropdown">
-              Profilo
+              <span class="dropdown-icon">👤</span>
+              <span>Profilo</span>
             </router-link>
             <router-link to="/my-events" class="dropdown-item" @click="closeDropdown">
-              📅 I Tuoi Eventi
+              <span class="dropdown-icon">📅</span>
+              <span>I Tuoi Eventi</span>
             </router-link>
             <router-link v-if="user.role === 'admin'" to="/admin" class="dropdown-item admin-dashboard" @click="closeDropdown">
-              📊 Dashboard Admin
+              <span class="dropdown-icon">📊</span>
+              <span>Dashboard Admin</span>
             </router-link>
             <router-link to="/notifications" class="dropdown-item notifications" @click="closeDropdown">
-              🔔 Notifiche
+              <span class="dropdown-icon">🔔</span>
+              <span>Notifiche</span>
               <span v-if="unreadCount > 0" class="notification-badge">{{ unreadCount }}</span>
             </router-link>
             <button type="button" class="dropdown-item logout" @click="logout">
-              Logout
+              <span class="dropdown-icon">🚪</span>
+              <span>Logout</span>
             </button>
           </div>
         </div>
@@ -260,6 +266,9 @@ const logout = () => {
   text-decoration: none;
   transition: all 0.3s;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-mobile.linklike {
@@ -271,17 +280,20 @@ const logout = () => {
 .btn-mobile.linklike:hover {
   background: #2563eb;
   color: white;
+  text-decoration: none;
 }
 
 .btn-mobile.primary {
   background: #2563eb;
   color: white;
   border-color: #2563eb;
+  text-decoration: none;
 }
 
 .btn-mobile.primary:hover {
   background: #1d4ed8;
   border-color: #1d4ed8;
+  text-decoration: none;
 }
 
 /* Hamburger Menu */
@@ -329,6 +341,12 @@ const logout = () => {
   font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.3s;
+  text-decoration: none;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
 }
 .btn:hover {
   background: #2563eb;
@@ -345,19 +363,23 @@ const logout = () => {
   background: #10b981;
   color: white;
   border-color: #10b981;
+  text-decoration: none;
 }
 .home-btn:hover {
   background: #059669;
   border-color: #059669;
+  text-decoration: none;
 }
 .review-btn {
   background: #8b5cf6;
   color: white;
   border-color: #8b5cf6;
+  text-decoration: none;
 }
 .review-btn:hover {
   background: #7c3aed;
   border-color: #7c3aed;
+  text-decoration: none;
 }
 .leaderboard-btn {
   background: linear-gradient(135deg, #f59e0b, #d97706);
@@ -366,12 +388,14 @@ const logout = () => {
   font-weight: 600;
   position: relative;
   overflow: hidden;
+  text-decoration: none;
 }
 .leaderboard-btn:hover {
   background: linear-gradient(135deg, #d97706, #b45309);
   border-color: #d97706;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+  text-decoration: none;
 }
 .leaderboard-btn::before {
   content: '';
@@ -397,10 +421,10 @@ const logout = () => {
 }
 
 .user-button {
-  padding: 0.45rem 0.9rem;
-  border-radius: 18px;
-  border: 1px solid #2563eb;
-  background: transparent;
+  padding: 0.5rem 1rem;
+  border-radius: 25px;
+  border: 2px solid #2563eb;
+  background: linear-gradient(135deg, #f8fafc, #e2e8f0);
   color: #2563eb;
   font-weight: 600;
   font-size: 0.9rem;
@@ -408,12 +432,44 @@ const logout = () => {
   transition: all 0.3s;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+  min-width: 140px;
 }
 
 .user-button:hover {
-  background: #2563eb;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.user-button:hover .user-avatar-small {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.user-avatar-small {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  transition: all 0.3s;
+  flex-shrink: 0;
+}
+
+.username-text {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 80px;
 }
 
 .dropdown-arrow {
@@ -430,32 +486,50 @@ const logout = () => {
   top: 100%;
   right: 0;
   background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  width: 180px;
-  max-width: 180px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  width: 200px;
+  max-width: 200px;
   z-index: 1000;
-  margin-top: 0.25rem;
+  margin-top: 0.5rem;
   overflow: hidden;
+  backdrop-filter: blur(10px);
+  animation: dropdownFadeIn 0.2s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .dropdown-item {
-  display: block;
+  display: flex;
+  align-items: center;
   width: 100%;
-  padding: 0.75rem 1rem;
+  padding: 0.875rem 1.25rem;
   text-align: left;
   background: none;
   border: none;
   color: #374151;
   font-size: 0.9rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
   text-decoration: none;
+  gap: 0.75rem;
 }
 
 .dropdown-item:hover {
-  background: #f3f4f6;
+  background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+  color: #1f2937;
+  transform: translateX(2px);
 }
 
 .dropdown-item.logout {
@@ -499,6 +573,13 @@ const logout = () => {
 
 .dropdown-item.logout:hover {
   background: #fef2f2;
+}
+
+.dropdown-icon {
+  font-size: 1.1rem;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
 }
 
 /* Mobile Menu Overlay */
@@ -661,6 +742,28 @@ const logout = () => {
     justify-content: space-between;
     gap: 1rem;
   }
+  
+  .user-button {
+    min-width: 120px;
+    padding: 0.4rem 0.8rem;
+    gap: 0.5rem;
+  }
+  
+  .user-avatar-small {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
+  }
+  
+  .username-text {
+    max-width: 60px;
+    font-size: 0.85rem;
+  }
+  
+  .dropdown-menu {
+    width: 180px;
+    max-width: 180px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -714,5 +817,19 @@ const logout = () => {
     font-size: 1.1rem;
   }
 }
-.linklike { text-decoration: none; }
+.linklike { 
+  text-decoration: none; 
+}
+
+.linklike:hover {
+  text-decoration: none;
+}
+
+.primary {
+  text-decoration: none;
+}
+
+.primary:hover {
+  text-decoration: none;
+}
 </style>

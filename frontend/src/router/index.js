@@ -7,6 +7,7 @@ import MyEvents from "../pages/MyEvents.vue";
 import ReviewPage from "../pages/ReviewPage.vue";
 import Notifications from "../pages/Notifications.vue";
 import AdminDashboard from "../pages/AdminDashboard.vue";
+import AdminModifications from "../pages/AdminModifications.vue";
 import LeaderboardPage from "../pages/LeaderboardPage.vue";
 
 const routes = [
@@ -18,6 +19,7 @@ const routes = [
   { path: "/review", component: ReviewPage },
   { path: "/notifications", component: Notifications },
   { path: "/admin", component: AdminDashboard },
+  { path: "/admin/modifications", component: AdminModifications },
   { path: "/leaderboard", component: LeaderboardPage }
 ];
 

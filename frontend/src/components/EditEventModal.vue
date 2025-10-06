@@ -4,9 +4,9 @@
       <button class="close" @click="$emit('close')">×</button>
       
       <div class="modal-header">
-        <div class="illustration">✏️</div>
-        <h3>Modifica Evento</h3>
-        <p>Aggiorna le informazioni del tuo evento</p>
+        <div class="illustration">{{ isModificationRequest ? '🔄' : '✏️' }}</div>
+        <h3>{{ isModificationRequest ? 'Richiedi Modifica Evento' : 'Modifica Evento' }}</h3>
+        <p>{{ isModificationRequest ? 'Richiedi una modifica per il tuo evento pubblicato' : 'Aggiorna le informazioni del tuo evento' }}</p>
       </div>
       
       <form @submit.prevent="onSubmit" class="event-form">
@@ -51,7 +51,7 @@
           <input type="url" v-model="form.link" placeholder="https://instagram.com/p/..." />
         </div>
         
-        <div class="status-info">
+        <div v-if="!isModificationRequest" class="status-info">
           <div class="status-badge pending">
             <span class="status-icon">⏳</span>
             <span>In attesa di approvazione</span>
@@ -59,12 +59,20 @@
           <small>Puoi modificare questo evento solo finché è in attesa di approvazione</small>
         </div>
         
+        <div v-else class="status-info modification-info">
+          <div class="status-badge approved">
+            <span class="status-icon">✅</span>
+            <span>Evento pubblicato</span>
+          </div>
+          <small>Le modifiche richieste verranno inviate per l'approvazione</small>
+        </div>
+        
         <div class="form-actions">
           <button type="button" class="btn secondary" @click="$emit('close')">
             Annulla
           </button>
           <button type="submit" class="btn primary" :disabled="loading">
-            {{ loading ? 'Salvataggio...' : 'Salva Modifiche' }}
+            {{ loading ? (isModificationRequest ? 'Invio richiesta...' : 'Salvataggio...') : (isModificationRequest ? 'Invia Richiesta' : 'Salva Modifiche') }}
           </button>
         </div>
         
@@ -75,8 +83,8 @@
     <!-- Success Popup -->
     <SuccessPopup 
       :show="showSuccessPopup" 
-      title="Evento aggiornato con successo!"
-      message="Le modifiche al tuo evento sono state salvate."
+      :title="isModificationRequest ? 'Richiesta inviata con successo!' : 'Evento aggiornato con successo!'"
+      :message="isModificationRequest ? 'La tua richiesta di modifica è stata inviata e sarà esaminata presto.' : 'Le modifiche al tuo evento sono state salvate.'"
       @close="handleSuccessClose" 
     />
   </div>
@@ -106,6 +114,9 @@ const form = ref({
   link: ''
 });
 
+// Computed per determinare se è una richiesta di modifica
+const isModificationRequest = ref(false);
+
 // Aggiorna il form quando cambia l'evento prop
 watch(() => props.event, (newEvent) => {
   if (newEvent) {
@@ -116,6 +127,9 @@ watch(() => props.event, (newEvent) => {
       location: newEvent.location || '',
       link: newEvent.link || ''
     };
+    
+    // Determina se è una richiesta di modifica (evento già approvato)
+    isModificationRequest.value = newEvent.approved === 'approved';
   }
 }, { immediate: true });
 
@@ -129,7 +143,13 @@ const onSubmit = async () => {
       date: new Date(form.value.date).toISOString()
     };
     
-    await api.put(`/events/${props.event._id}`, eventData);
+    if (isModificationRequest.value) {
+      // Richiesta di modifica per evento approvato
+      await api.post(`/events/${props.event._id}/request-modification`, eventData);
+    } else {
+      // Modifica diretta per evento pending
+      await api.put(`/events/${props.event._id}`, eventData);
+    }
     
     // Mostra il popup di successo
     showSuccessPopup.value = true;
@@ -139,7 +159,9 @@ const onSubmit = async () => {
     if (e.response?.data?.error) {
       error.value = e.response.data.error;
     } else {
-      error.value = 'Errore nell\'aggiornamento dell\'evento. Riprova più tardi.';
+      error.value = isModificationRequest.value 
+        ? 'Errore nell\'invio della richiesta di modifica. Riprova più tardi.'
+        : 'Errore nell\'aggiornamento dell\'evento. Riprova più tardi.';
     }
   } finally {
     loading.value = false;
@@ -281,6 +303,19 @@ const handleSuccessClose = () => {
 .status-info small {
   color: #92400e;
   font-size: 0.8rem;
+}
+
+.modification-info {
+  background: #f0fdf4;
+  border: 1px solid #10b981;
+}
+
+.modification-info .status-badge.approved {
+  color: #065f46;
+}
+
+.modification-info small {
+  color: #065f46;
 }
 
 .form-actions {

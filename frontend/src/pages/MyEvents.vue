@@ -58,8 +58,18 @@
             >
               ✏️ Modifica
             </button>
+            <button 
+              v-else-if="event.approved === 'approved' && !event.hasPendingModifications" 
+              @click="requestModification(event)"
+              class="btn modify-btn"
+            >
+              🔄 Richiedi Modifica
+            </button>
+            <span v-else-if="event.approved === 'approved' && event.hasPendingModifications" class="action-disabled">
+              ⏳ Modifica in attesa di approvazione
+            </span>
             <span v-else class="action-disabled">
-              {{ event.approved === 'approved' ? 'Evento pubblicato' : 'Evento rifiutato' }}
+              Evento rifiutato
             </span>
           </div>
         </div>
@@ -120,6 +130,12 @@ const formatDate = (dateString) => {
 
 // Funzione per aprire il modal di modifica evento
 const editEvent = (event) => {
+  selectedEvent.value = event;
+  showEditEventModal.value = true;
+};
+
+// Funzione per richiedere modifica di un evento approvato
+const requestModification = (event) => {
   selectedEvent.value = event;
   showEditEventModal.value = true;
 };
@@ -339,6 +355,23 @@ onMounted(async () => {
 
 .edit-btn:hover {
   background: #d97706;
+  transform: translateY(-1px);
+}
+
+.modify-btn {
+  background: #8b5cf6;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+}
+
+.modify-btn:hover {
+  background: #7c3aed;
   transform: translateY(-1px);
 }
 

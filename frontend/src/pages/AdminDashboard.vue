@@ -183,6 +183,9 @@
         <button @click="viewPendingEvents" class="action-btn">
           ⏳ Gestisci Eventi in Attesa
         </button>
+        <button @click="viewPendingModifications" class="action-btn">
+          🔄 Gestisci Modifiche in Attesa (Admin & Reviewer)
+        </button>
         <button @click="viewAllUsers" class="action-btn">
           👥 Gestisci Utenti
         </button>
@@ -224,7 +227,7 @@ const categoriesChart = ref(null);
 const eventsChartInstance = ref(null);
 const categoriesChartInstance = ref(null);
 
-// Verifica che l'utente sia admin
+// Verifica che l'utente sia admin o reviewer
 const checkAdminAccess = () => {
   const user = auth.getUser();
   console.log('Current user:', user);
@@ -233,9 +236,9 @@ const checkAdminAccess = () => {
     router.push('/login');
     return false;
   }
-  if (user.role !== 'admin') {
-    console.log('User is not admin, role:', user.role);
-    alert('Accesso negato. Solo gli amministratori possono accedere a questa pagina.');
+  if (user.role !== 'admin' && user.role !== 'reviewer') {
+    console.log('User is not admin or reviewer, role:', user.role);
+    alert('Accesso negato. Solo gli amministratori e i reviewer possono accedere a questa pagina.');
     router.push('/');
     return false;
   }
@@ -444,6 +447,10 @@ const exportData = () => {
 
 const viewPendingEvents = () => {
   router.push('/review');
+};
+
+const viewPendingModifications = () => {
+  router.push('/admin/modifications');
 };
 
 const viewAllUsers = () => {
