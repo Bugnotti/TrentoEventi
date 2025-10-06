@@ -4,15 +4,41 @@
     <section class="hero">
       <div class="hero-content">
         <h1>Contribuisci anche tu: tutti gli eventi di Trento</h1>
-        <p>Scopri cosa succede in città e aggiungi gli eventi che conosci: aiutiamo insieme la community a restare aggiornata.</p>
+        
+        <!-- Desktop: descrizione sempre visibile -->
+        <p class="hero-description desktop-only">Scopri cosa succede in città e aggiungi gli eventi che conosci: aiutiamo insieme la community a restare aggiornata.</p>
+        
+        <!-- Mobile: descrizione espandibile -->
+        <div v-if="showDescription" class="hero-description mobile-expandable">
+          Scopri cosa succede in città e aggiungi gli eventi che conosci: aiutiamo insieme la community a restare aggiornata.
+        </div>
+        
         <div class="hero-actions">
-          <button class="btn cta wide" @click="openAddEvent">
+          <!-- Desktop: pulsante singolo -->
+          <button class="btn cta wide desktop-only" @click="openAddEvent">
             <span class="icon">＋</span>
             Aggiungo Evento
           </button>
+          
+          <!-- Mobile: pulsanti affiancati -->
+          <div class="mobile-actions">
+            <button class="btn secondary" @click="toggleDescription">
+              <span class="icon">ℹ️</span>
+              Scopri di più
+            </button>
+            <button class="btn primary" @click="openAddEvent">
+              <span class="icon">＋</span>
+              Aggiungi Evento
+            </button>
+          </div>
         </div>
       </div>
     </section>
+    
+    <!-- FAB (Floating Action Button) per mobile -->
+    <button class="fab" @click="openAddEvent" title="Aggiungi Evento">
+      <span class="fab-icon">＋</span>
+    </button>
     <Filters 
       :key="`filters-${availableCategories.length}`"
       :selectedDate="selectedDate" 
@@ -78,6 +104,10 @@ const currentPage = ref(1);
 const events = ref([]);
 const availableCategories = ref([]);
 const loading = ref(true);
+const showAddEvent = ref(false);
+const showProfileModal = ref(false);
+const selectedUsername = ref('');
+const showDescription = ref(false);
 
 onMounted(async () => {
   try {
@@ -245,12 +275,13 @@ const resetFilters = (shouldScroll = true) => {
   }
 };
 
-const showAddEvent = ref(false);
 const openAddEvent = () => { showAddEvent.value = true; };
 
+const toggleDescription = () => {
+  showDescription.value = !showDescription.value;
+};
+
 // User Profile Modal
-const showProfileModal = ref(false);
-const selectedUsername = ref('');
 
 const showUserProfile = (username) => {
   console.log('Mostrando profilo per:', username);
@@ -365,6 +396,107 @@ const selectedDayLabel = computed(() => {
 .hero h1 { margin: 0; font-size: 1.8rem; color: #111827; }
 .hero p { margin: 0.6rem 0 1.2rem; color: #4b5563; }
 .hero-actions { display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; }
+
+/* Pulsanti mobile affiancati */
+.mobile-actions {
+  display: none;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.mobile-actions .btn {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.mobile-actions .btn.secondary {
+  background: #ffffff;
+  color: #2563eb;
+  border: 2px solid #2563eb;
+}
+
+.mobile-actions .btn.secondary:hover {
+  background: #eff6ff;
+  border-color: #1d4ed8;
+  color: #1d4ed8;
+}
+
+.mobile-actions .btn.primary {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.mobile-actions .btn.primary:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.hero-description.mobile-expandable {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  color: #4b5563;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* FAB (Floating Action Button) */
+.fab {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.fab:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 25px rgba(16, 185, 129, 0.5);
+}
+
+.fab-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+}
 .btn.cta {
   background: linear-gradient(135deg, #22c55e, #16a34a);
   color: #ffffff;
@@ -387,12 +519,51 @@ const selectedDayLabel = computed(() => {
   font-size: 1.1rem;
 }
 
-@media (max-width: 640px) {
-  .hero { padding: 1.6rem 1rem; }
-  .hero h1 { font-size: 1.4rem; line-height: 1.2; }
-  .hero p { font-size: 0.95rem; }
-  .events-grid { grid-template-columns: 1fr; padding: 0.8rem; gap: 0.8rem; }
-  .pagination { padding: 0 1rem; }
+@media (max-width: 768px) {
+  .events-grid { 
+    grid-template-columns: 1fr; 
+    padding: 1rem; 
+    gap: 1rem; 
+  }
+  
+  /* Hero più compatto su mobile */
+  .hero {
+    padding: 1.2rem 1rem;
+  }
+  
+  .hero h1 {
+    font-size: 1.4rem;
+    line-height: 1.3;
+    margin-bottom: 0.8rem;
+  }
+  
+  /* Nascondi descrizione desktop */
+  .desktop-only {
+    display: none;
+  }
+  
+  .hero-actions {
+    margin-top: 1rem;
+  }
+  
+  /* Mostra pulsanti mobile affiancati */
+  .mobile-actions {
+    display: flex;
+  }
+  
+  /* Nascondi pulsante desktop */
+  .hero-actions .btn.cta.desktop-only {
+    display: none;
+  }
+  
+  /* Nascondi FAB su mobile (sostituito dai pulsanti) */
+  .fab {
+    display: none;
+  }
+  
+  .pagination { 
+    padding: 0 1rem; 
+  }
   
   .loading-section {
     padding: 3rem 1rem;
@@ -401,6 +572,43 @@ const selectedDayLabel = computed(() => {
   .loading-spinner {
     width: 40px;
     height: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    padding: 1rem 0.8rem;
+  }
+  
+  .hero h1 {
+    font-size: 1.2rem;
+    line-height: 1.2;
+  }
+  
+  .info-toggle {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+  }
+  
+  .hero-description.mobile-expandable {
+    font-size: 0.85rem;
+    padding: 0.8rem;
+  }
+  
+  .fab {
+    width: 55px;
+    height: 55px;
+    bottom: 1.5rem;
+    right: 1.5rem;
+  }
+  
+  .fab-icon {
+    font-size: 1.6rem;
+  }
+  
+  .events-grid { 
+    padding: 0.8rem; 
+    gap: 0.8rem; 
   }
   
   /* Evita overflow orizzontale su mobile */
