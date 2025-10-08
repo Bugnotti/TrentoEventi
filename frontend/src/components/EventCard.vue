@@ -1,10 +1,11 @@
 <template>
-  <div 
+  <a 
+    v-if="event.link"
+    :href="event.link"
+    target="_blank"
+    rel="noopener noreferrer"
     class="event-card" 
-    @click="openEventInstagram"
-    @touchend.prevent="handleCardTouch"
-    role="button"
-    tabindex="0"
+    @click="trackClick"
   >
     <h3 class="event-title">{{ event.name }}</h3>
     <div class="event-date">
@@ -20,11 +21,37 @@
       <span 
         v-if="shouldShowInstagram()" 
         class="reporter-name clickable"
-        @click.stop="openReporterInstagram"
-        @touchend.stop.prevent="handleReporterTouch"
+        @click.stop.prevent="openReporterInstagram"
         :title="'Clicca per vedere il profilo Instagram di ' + getReporterDisplayName()"
-        role="button"
-        tabindex="0"
+      >
+        📸 {{ getReporterDisplayName() }}
+      </span>
+      <span v-else class="reporter-name">
+        {{ getReporterDisplayName() }}
+      </span>
+    </div>
+  </a>
+  
+  <div 
+    v-else
+    class="event-card event-card-no-link"
+  >
+    <h3 class="event-title">{{ event.name }}</h3>
+    <div class="event-date">
+      <span class="date-icon">📅</span>
+      <span class="date-text">
+        <span class="date-bold">{{ formatDate(event.date) }}</span>
+        <span class="date-time">{{ formatTime(event.date) }}</span>
+      </span>
+    </div>
+    <p class="event-location">📍 {{ event.location }}</p>
+    <div class="reported-by">
+      <span>Evento segnalato da</span>
+      <span 
+        v-if="shouldShowInstagram()" 
+        class="reporter-name clickable"
+        @click.stop.prevent="openReporterInstagram"
+        :title="'Clicca per vedere il profilo Instagram di ' + getReporterDisplayName()"
       >
         📸 {{ getReporterDisplayName() }}
       </span>
@@ -50,27 +77,13 @@ const emit = defineEmits(['show-user-profile']);
 
 const user = ref(authService.getUser());
 
-const openEventInstagram = async () => {
-  if (props.event.link) {
-    // Traccia il click se l'utente è loggato
-    if (user.value) {
-      try {
-        await api.post(`/events/${props.event._id}/click`);
-      } catch (error) {
-        console.error('Errore nel tracking del click:', error);
-      }
-    }
-    
-    // Apri il post Instagram dell'evento
-    window.open(props.event.link, '_blank');
-  } else {
-    console.log('Nessun link Instagram disponibile per questo evento');
+// Traccia il click sull'evento in modo non bloccante
+const trackClick = () => {
+  if (user.value) {
+    api.post(`/events/${props.event._id}/click`).catch(error => {
+      console.error('Errore nel tracking del click:', error);
+    });
   }
-};
-
-// Handler per touch events sulla card (per iOS)
-const handleCardTouch = (event) => {
-  openEventInstagram();
 };
 
 const openReporterInstagram = () => {
@@ -86,11 +99,6 @@ const openReporterInstagram = () => {
     const instagramUrl = `https://www.instagram.com/${cleanHandle}/`;
     window.open(instagramUrl, '_blank');
   }
-};
-
-// Handler per touch events sul nome reporter (per iOS)
-const handleReporterTouch = (event) => {
-  openReporterInstagram();
 };
 
 const getReporterDisplayName = () => {
@@ -152,11 +160,25 @@ const formatTime = (dateString) => {
   touch-action: manipulation;
   user-select: none;
   -webkit-user-select: none;
+  /* Rimuovi stili di default per i link */
+  text-decoration: none;
+  color: inherit;
 }
+
+.event-card-no-link {
+  cursor: default;
+}
+
 .event-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 4px 16px rgba(0,0,0,0.1);
 }
+
+.event-card-no-link:hover {
+  transform: none;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+
 .event-card:active {
   transform: translateY(-2px);
   box-shadow: 0 3px 12px rgba(0,0,0,0.08);
