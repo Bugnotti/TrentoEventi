@@ -1,5 +1,11 @@
 <template>
-  <div class="event-card" @click="openEventInstagram">
+  <div 
+    class="event-card" 
+    @click="openEventInstagram"
+    @touchend.prevent="handleCardTouch"
+    role="button"
+    tabindex="0"
+  >
     <h3 class="event-title">{{ event.name }}</h3>
     <div class="event-date">
       <span class="date-icon">📅</span>
@@ -15,7 +21,10 @@
         v-if="shouldShowInstagram()" 
         class="reporter-name clickable"
         @click.stop="openReporterInstagram"
+        @touchend.stop.prevent="handleReporterTouch"
         :title="'Clicca per vedere il profilo Instagram di ' + getReporterDisplayName()"
+        role="button"
+        tabindex="0"
       >
         📸 {{ getReporterDisplayName() }}
       </span>
@@ -59,6 +68,11 @@ const openEventInstagram = async () => {
   }
 };
 
+// Handler per touch events sulla card (per iOS)
+const handleCardTouch = (event) => {
+  openEventInstagram();
+};
+
 const openReporterInstagram = () => {
   // Controlla se l'utente ha un username Instagram nel suo profilo
   if (props.event.reporter?.instagram?.username) {
@@ -72,6 +86,11 @@ const openReporterInstagram = () => {
     const instagramUrl = `https://www.instagram.com/${cleanHandle}/`;
     window.open(instagramUrl, '_blank');
   }
+};
+
+// Handler per touch events sul nome reporter (per iOS)
+const handleReporterTouch = (event) => {
+  openReporterInstagram();
 };
 
 const getReporterDisplayName = () => {
@@ -128,10 +147,19 @@ const formatTime = (dateString) => {
   justify-content: space-between;
   transition: transform 0.2s, box-shadow 0.2s;
   cursor: pointer;
+  /* Migliora il touch su iOS */
+  -webkit-tap-highlight-color: rgba(59, 130, 246, 0.1);
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
 }
 .event-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+.event-card:active {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 12px rgba(0,0,0,0.08);
 }
 .event-title {
   margin: 0 0 0.75rem;
@@ -204,12 +232,23 @@ const formatTime = (dateString) => {
   border-radius: 4px;
   padding: 2px 4px;
   background: rgba(233, 30, 99, 0.1);
+  /* Migliora il touch su iOS */
+  -webkit-tap-highlight-color: rgba(233, 30, 99, 0.2);
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .reporter-name.clickable:hover {
   color: #ad1457;
   background: rgba(233, 30, 99, 0.2);
   transform: scale(1.05);
+}
+
+.reporter-name.clickable:active {
+  color: #ad1457;
+  background: rgba(233, 30, 99, 0.25);
+  transform: scale(1.02);
 }
 
 /* Responsive styles */
