@@ -22,10 +22,10 @@ export const createRateLimit = (windowMs, max, message) => {
   });
 };
 
-// General API rate limiting (100 requests per 15 minutes)
+// General API rate limiting (300 requests per 15 minutes in production, 100 in development)
 export const generalLimiter = createRateLimit(
   15 * 60 * 1000, // 15 minutes
-  100, // 100 requests
+  process.env.NODE_ENV === 'production' ? 300 : 100, // 300 requests in production, 100 in development
   'Troppe richieste dall\'IP, riprova più tardi'
 );
 

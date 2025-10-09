@@ -43,7 +43,12 @@ app.use('/api/events', eventCreationLimiter);
 // CORS configuration
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? [process.env.FRONTEND_URL, process.env.ADMIN_URL].filter(Boolean)
+    ? [
+        process.env.FRONTEND_URL, 
+        process.env.ADMIN_URL,
+        'https://trentomorta.it',
+        'https://www.trentomorta.it'
+      ].filter(Boolean)
     : true,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
