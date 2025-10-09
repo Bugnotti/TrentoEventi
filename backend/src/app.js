@@ -8,18 +8,52 @@ import authRoutes from "./routes/authRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import {
+  helmetConfig,
+  generalLimiter,
+  authLimiter,
+  eventCreationLimiter,
+  mongoSanitizeConfig,
+  hppConfig,
+  compressionConfig,
+  requestSizeLimit,
+  validateEnvironment
+} from "./config/security.js";
+import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// Validate environment variables
+validateEnvironment();
+
 const app = express();
+
+// Security middleware (order matters!)
+app.use(helmetConfig);
+app.use(compressionConfig);
+// app.use(mongoSanitizeConfig); // Temporarily disabled due to compatibility issues
+app.use(hppConfig);
+
+// Rate limiting
+app.use('/api', generalLimiter);
+app.use('/api/auth', authLimiter);
+app.use('/api/events', eventCreationLimiter);
+
+// CORS configuration
 app.use(cors({
-  origin: true,
+  origin: process.env.NODE_ENV === 'production' 
+    ? [process.env.FRONTEND_URL, process.env.ADMIN_URL].filter(Boolean)
+    : true,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-dev-bypass']
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-dev-bypass'],
+  exposedHeaders: ['Retry-After']
 }));
-app.use(express.json());
+
+// Request parsing with size limits
+app.use(express.json({ limit: requestSizeLimit }));
+app.use(express.urlencoded({ limit: requestSizeLimit, extended: true }));
 
 // Debug middleware to track API requests
 app.use("/api", (req, res, next) => {
@@ -33,6 +67,10 @@ app.use("/api/auth", authRoutes);
 app.use("/api/review", reviewRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/admin", adminRoutes);
+
+// Error handling middleware (must be last)
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 // Debug logging
 console.log('🔍 Server startup debug:');

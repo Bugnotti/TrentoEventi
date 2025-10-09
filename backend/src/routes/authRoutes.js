@@ -3,42 +3,59 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import { authenticateToken, requireReviewerOrAdmin } from "../middleware/auth.js";
+import { 
+  validateUserRegistration, 
+  validateUserLogin,
+  handleValidationErrors,
+  sanitizeInput 
+} from "../middleware/validation.js";
 
 const router = express.Router();
 
 // POST /api/auth/register
-router.post("/register", async (req, res) => {
-  try {
-    const { username, email, password, firstName, lastName, instagram } = req.body;
-    if (!username || !email || !password) {
-      return res.status(400).json({ error: "Username, email e password sono obbligatori" });
+router.post("/register", 
+  sanitizeInput,
+  validateUserRegistration,
+  handleValidationErrors,
+  async (req, res) => {
+    try {
+      const { username, email, password, firstName, lastName, instagram } = req.body;
+      
+      const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+      if (existingUser) {
+        return res.status(409).json({ error: "Username o email già in uso" });
+      }
+      
+      const passwordHash = await bcrypt.hash(password, 12); // Increased salt rounds
+      const user = await User.create({ 
+        username, 
+        email, 
+        passwordHash, 
+        firstName, 
+        lastName, 
+        role: 'user',
+        instagram: instagram || { showProfile: false, username: '' }
+      });
+      
+      res.status(201).json({ 
+        id: user._id, 
+        email: user.email, 
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+        points: user.points,
+        instagram: user.instagram
+      });
+    } catch (err) {
+      console.error("Errore registrazione:", err);
+      res.status(500).json({ 
+        error: "Errore nella registrazione",
+        details: process.env.NODE_ENV === 'development' ? err.message : undefined
+      });
     }
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
-    if (existingUser) return res.status(409).json({ error: "Username o email già in uso" });
-    const passwordHash = await bcrypt.hash(password, 10);
-    const user = await User.create({ 
-      username, 
-      email, 
-      passwordHash, 
-      firstName, 
-      lastName, 
-      role: 'user',
-      instagram: instagram || { showProfile: false, username: '' }
-    });
-    res.status(201).json({ 
-      id: user._id, 
-      email: user.email, 
-      username: user.username,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      role: user.role,
-      points: user.points,
-      instagram: user.instagram
-    });
-  } catch (err) {
-    res.status(500).json({ error: "Errore registrazione" });
   }
-});
+);
 
 // POST /api/auth/login
 router.post("/login", async (req, res) => {

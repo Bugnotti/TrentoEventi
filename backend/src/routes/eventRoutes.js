@@ -2,6 +2,13 @@ import express from "express";
 import Event from "../models/Event.js";
 import { authenticateToken } from "../middleware/auth.js";
 import { createNotification, createNotificationForAdminsAndReviewers } from "../utils/notifications.js";
+import { 
+  validateEvent, 
+  validateEventModification,
+  validateObjectId,
+  handleValidationErrors,
+  sanitizeInput 
+} from "../middleware/validation.js";
 
 const router = express.Router();
 
@@ -21,22 +28,32 @@ router.get("/", async (req, res) => {
 });
 
 // POST nuovo evento
-router.post("/", authenticateToken, async (req, res) => {
-  try {
-    const eventData = {
-      ...req.body,
-      reporter: req.body.reporter || req.user?.userId || null // Usa il reporter dal body o dall'utente autenticato
-    };
-    const newEvent = new Event(eventData);
-    await newEvent.save();
-    
-    // Popola i dati dell'utente per la risposta
-    await newEvent.populate('reporter', 'username firstName lastName instagram');
-    res.status(201).json(newEvent);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
+router.post("/", 
+  authenticateToken,
+  sanitizeInput,
+  validateEvent,
+  handleValidationErrors,
+  async (req, res) => {
+    try {
+      const eventData = {
+        ...req.body,
+        reporter: req.body.reporter || req.user?.userId || null // Usa il reporter dal body o dall'utente autenticato
+      };
+      const newEvent = new Event(eventData);
+      await newEvent.save();
+      
+      // Popola i dati dell'utente per la risposta
+      await newEvent.populate('reporter', 'username firstName lastName instagram');
+      res.status(201).json(newEvent);
+    } catch (err) {
+      console.error("Errore creazione evento:", err);
+      res.status(400).json({ 
+        error: "Errore nella creazione dell'evento",
+        details: process.env.NODE_ENV === 'development' ? err.message : undefined
+      });
+    }
   }
-});
+);
 
 // GET eventi dell'utente corrente
 router.get("/my-events", authenticateToken, async (req, res) => {
