@@ -1,6 +1,6 @@
 <template>
   <div class="filters">
-    <div class="filter-group">
+    <div class="filter-group date-group">
       <span>📅 Data:</span>
       <button 
         v-for="option in dateOptions" 
@@ -18,10 +18,10 @@
           @change="$emit('update-date', $event.target.value)" 
         />
       </div>
-      <button class="filter-btn" @click="$emit('reset', true)">Reset filtri</button>
+      <button class="filter-btn reset-btn desktop-reset" @click="$emit('reset', true)">Reset filtri</button>
     </div>
 
-    <div class="filter-group">
+    <div class="filter-group category-group">
       <div class="category-filter-container">
         <span class="category-label">🔎 Categoria:</span>
         <div class="category-filter-wrapper">
@@ -32,6 +32,9 @@
         </div>
       </div>
     </div>
+    
+    <!-- Reset button per mobile - alla fine -->
+    <button class="filter-btn reset-btn mobile-reset" @click="$emit('reset', true)">🔄 Reset filtri</button>
   </div>
 </template>
 
@@ -99,6 +102,15 @@ const handleDateClick = (option) => {
 .filter-btn.active {
   background: #2563eb;
   color: white;
+}
+
+/* Gestione visibilità reset button desktop/mobile */
+.mobile-reset {
+  display: none; /* Nascosto su desktop */
+}
+
+.desktop-reset {
+  display: inline-block; /* Visibile su desktop */
 }
 
 /* Input e select */
@@ -178,6 +190,31 @@ select:focus, input[type="date"]:focus {
     font-weight: 600;
   }
   .filter-btn:hover {
+    transform: scale(0.98);
+  }
+  
+  /* Su mobile: nascondi reset desktop, mostra reset mobile */
+  .desktop-reset {
+    display: none !important;
+  }
+  
+  .mobile-reset {
+    display: block;
+    width: 100%;
+    background: #dc2626; /* Rosso per distinguerlo */
+    color: white;
+    border: 2px solid #dc2626;
+    padding: 0.8rem 1rem;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-top: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+  }
+  
+  .mobile-reset:hover {
+    background: #b91c1c;
+    border-color: #b91c1c;
     transform: scale(0.98);
   }
   

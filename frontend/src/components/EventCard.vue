@@ -1,63 +1,75 @@
 <template>
-  <a 
-    v-if="event.link"
-    :href="event.link"
-    target="_blank"
-    rel="noopener noreferrer"
-    class="event-card" 
-    @click="trackClick"
-  >
-    <h3 class="event-title">{{ event.name }}</h3>
-    <div class="event-date">
-      <span class="date-icon">📅</span>
-      <span class="date-text">
-        <span class="date-bold">{{ formatDate(event.date) }}</span>
-        <span class="date-time">{{ formatTime(event.date) }}</span>
-      </span>
+  <div class="event-card-container">
+    <a 
+      v-if="event.link"
+      :href="event.link"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="event-card" 
+      @click="trackClick"
+    >
+      <h3 class="event-title">{{ event.name }}</h3>
+      <div class="event-date">
+        <span class="date-icon">📅</span>
+        <span class="date-text">
+          <span class="date-bold">{{ formatDate(event.date) }}</span>
+          <span class="date-time">{{ formatTime(event.date) }}</span>
+        </span>
+      </div>
+      <p class="event-location">📍 {{ event.location }}</p>
+      <div class="reported-by">
+        <span>Evento segnalato da</span>
+        <span 
+          v-if="shouldShowInstagram()" 
+          class="reporter-name clickable"
+          @click.stop.prevent="openReporterInstagram"
+          :title="'Clicca per vedere il profilo Instagram di ' + getReporterDisplayName()"
+        >
+          📸 {{ getReporterDisplayName() }}
+        </span>
+        <span v-else class="reporter-name">
+          {{ getReporterDisplayName() }}
+        </span>
+      </div>
+    </a>
+    
+    <div 
+      v-else
+      class="event-card event-card-no-link"
+    >
+      <h3 class="event-title">{{ event.name }}</h3>
+      <div class="event-date">
+        <span class="date-icon">📅</span>
+        <span class="date-text">
+          <span class="date-bold">{{ formatDate(event.date) }}</span>
+          <span class="date-time">{{ formatTime(event.date) }}</span>
+        </span>
+      </div>
+      <p class="event-location">📍 {{ event.location }}</p>
+      <div class="reported-by">
+        <span>Evento segnalato da</span>
+        <span 
+          v-if="shouldShowInstagram()" 
+          class="reporter-name clickable"
+          @click.stop.prevent="openReporterInstagram"
+          :title="'Clicca per vedere il profilo Instagram di ' + getReporterDisplayName()"
+        >
+          📸 {{ getReporterDisplayName() }}
+        </span>
+        <span v-else class="reporter-name">
+          {{ getReporterDisplayName() }}
+        </span>
+      </div>
     </div>
-    <p class="event-location">📍 {{ event.location }}</p>
-    <div class="reported-by">
-      <span>Evento segnalato da</span>
-      <span 
-        v-if="shouldShowInstagram()" 
-        class="reporter-name clickable"
-        @click.stop.prevent="openReporterInstagram"
-        :title="'Clicca per vedere il profilo Instagram di ' + getReporterDisplayName()"
-      >
-        📸 {{ getReporterDisplayName() }}
-      </span>
-      <span v-else class="reporter-name">
-        {{ getReporterDisplayName() }}
-      </span>
-    </div>
-  </a>
-  
-  <div 
-    v-else
-    class="event-card event-card-no-link"
-  >
-    <h3 class="event-title">{{ event.name }}</h3>
-    <div class="event-date">
-      <span class="date-icon">📅</span>
-      <span class="date-text">
-        <span class="date-bold">{{ formatDate(event.date) }}</span>
-        <span class="date-time">{{ formatTime(event.date) }}</span>
-      </span>
-    </div>
-    <p class="event-location">📍 {{ event.location }}</p>
-    <div class="reported-by">
-      <span>Evento segnalato da</span>
-      <span 
-        v-if="shouldShowInstagram()" 
-        class="reporter-name clickable"
-        @click.stop.prevent="openReporterInstagram"
-        :title="'Clicca per vedere il profilo Instagram di ' + getReporterDisplayName()"
-      >
-        📸 {{ getReporterDisplayName() }}
-      </span>
-      <span v-else class="reporter-name">
-        {{ getReporterDisplayName() }}
-      </span>
+
+    <!-- Pulsante condivisione -->
+    <div class="share-section">
+      <ShareEvent 
+        :title="event.name"
+        :text="getShareText()"
+        :url="event.link || getCurrentPageUrl()"
+        @shared="handleShared"
+      />
     </div>
   </div>
 </template>
@@ -65,6 +77,7 @@
 import { ref } from 'vue';
 import authService from '../services/auth';
 import api from '../services/api';
+import ShareEvent from './ShareEvent.vue';
 
 const props = defineProps({
   event: {
@@ -142,9 +155,31 @@ const formatTime = (dateString) => {
     minute: '2-digit'
   });
 };
+
+// Funzioni per la condivisione
+const getShareText = () => {
+  const dateStr = formatDate(props.event.date);
+  const timeStr = formatTime(props.event.date);
+  const siteUrl = window.location.origin;
+  return `📅 ${dateStr} alle ${timeStr}\n📍 ${props.event.location}\n\n✨ Scoperto su: ${siteUrl}`;
+};
+
+const getCurrentPageUrl = () => {
+  return window.location.origin;
+};
+
+const handleShared = (platform) => {
+  console.log(`Evento condiviso su ${platform}`);
+};
 </script>
 
 <style scoped>
+.event-card-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
 .event-card {
   background: #ffffff;
   border-radius: 16px;
@@ -165,23 +200,23 @@ const formatTime = (dateString) => {
   color: inherit;
 }
 
-.event-card-no-link {
-  cursor: default;
-}
-
 .event-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 4px 16px rgba(0,0,0,0.1);
 }
 
-.event-card-no-link:hover {
-  transform: none;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-}
-
 .event-card:active {
   transform: translateY(-2px);
   box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+}
+
+.share-section {
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  background: #f9fafb;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
 }
 .event-title {
   margin: 0 0 0.75rem;
@@ -272,6 +307,7 @@ const formatTime = (dateString) => {
   background: rgba(233, 30, 99, 0.25);
   transform: scale(1.02);
 }
+
 
 /* Responsive styles */
 @media (max-width: 768px) {
