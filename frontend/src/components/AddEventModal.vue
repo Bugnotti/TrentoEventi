@@ -125,8 +125,8 @@ const onSubmit = async () => {
       reporterInstagram: (user.value?.instagram?.showProfile && user.value?.instagram?.username) 
         ? user.value.instagram.username 
         : null,
-      reporter: user.value?.id || null, // Aggiungi riferimento all'utente
-      approved: "pending" // Eventi nuovi vanno in pending per revisione
+      reporter: user.value?.id || null,
+      approved: "pending"
     };
     
     await api.post('/events', eventData);

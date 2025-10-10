@@ -168,9 +168,9 @@ const getCurrentPageUrl = () => {
   return window.location.origin;
 };
 
-const handleShared = (platform) => {
-  console.log(`Evento condiviso su ${platform}`);
-};
+  const handleShared = (platform) => {
+    console.log(`Evento condiviso su ${platform}`);
+  };
 </script>
 
 <style scoped>
@@ -362,4 +362,5 @@ const handleShared = (platform) => {
     font-size: 0.75rem;
   }
 }
+
 </style>

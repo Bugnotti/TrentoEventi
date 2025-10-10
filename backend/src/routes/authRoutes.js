@@ -1,6 +1,7 @@
 import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import passport from "passport";
 import User from "../models/User.js";
 import { authenticateToken, requireReviewerOrAdmin } from "../middleware/auth.js";
 import { 
@@ -9,6 +10,7 @@ import {
   handleValidationErrors,
   sanitizeInput 
 } from "../middleware/validation.js";
+import { googleCallback } from "../controllers/authController.js";
 
 const router = express.Router();
 
@@ -63,6 +65,12 @@ router.post("/login", async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
     if (!user) return res.status(401).json({ error: "Credenziali non valide" });
+    
+    // Se l'utente usa Google OAuth, non può fare login con password
+    if (user.authProvider === 'google' && !user.passwordHash) {
+      return res.status(401).json({ error: "Questo account usa l'autenticazione Google. Accedi con Google." });
+    }
+    
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) return res.status(401).json({ error: "Credenziali non valide" });
     const token = jwt.sign({ sub: user._id, role: user.role }, process.env.JWT_SECRET || "dev_secret", { expiresIn: "7d" });
@@ -76,13 +84,31 @@ router.post("/login", async (req, res) => {
         lastName: user.lastName, 
         role: user.role,
         points: user.points,
-        instagram: user.instagram
+        instagram: user.instagram,
+        profilePicture: user.profilePicture
       } 
     });
   } catch (err) {
     res.status(500).json({ error: "Errore login" });
   }
 });
+
+// GET /api/auth/google - Inizia autenticazione Google
+router.get("/google", 
+  passport.authenticate("google", { 
+    scope: ["profile", "email"],
+    session: false
+  })
+);
+
+// GET /api/auth/google/callback - Callback Google OAuth
+router.get("/google/callback",
+  passport.authenticate("google", { 
+    failureRedirect: "/login",
+    session: false
+  }),
+  googleCallback
+);
 
 // PUT /api/auth/profile - Aggiorna profilo utente
 router.put("/profile", authenticateToken, async (req, res) => {

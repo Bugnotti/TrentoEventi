@@ -27,7 +27,12 @@
     "jsdom": "^27.0.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.18.1",
-    "pg": "^8.16.3"
+    "multer": "^2.0.2",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
+    "pg": "^8.16.3",
+    "sharp": "^0.34.4",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
