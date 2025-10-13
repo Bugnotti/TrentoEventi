@@ -1,6 +1,5 @@
 import express from "express";
 import cors from "cors";
-import passport from "passport";
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { existsSync, readdirSync } from 'fs';
@@ -21,7 +20,6 @@ import {
   validateEnvironment
 } from "./config/security.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
-import { configureGoogleAuth } from "./controllers/authController.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -61,10 +59,6 @@ app.use(cors({
 // Request parsing with size limits
 app.use(express.json({ limit: requestSizeLimit }));
 app.use(express.urlencoded({ limit: requestSizeLimit, extended: true }));
-
-// Initialize Passport for Google OAuth
-app.use(passport.initialize());
-configureGoogleAuth();
 
 // Health check endpoint for UptimeRobot
 app.get('/_warmup', (req, res) => res.status(200).send('ok'));

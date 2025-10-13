@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Login from "../pages/Login.vue";
 import Register from "../pages/Register.vue";
-import AuthCallback from "../pages/AuthCallback.vue";
 import MissionVision from "../pages/MissionVision.vue";
 import Profile from "../pages/Profile.vue";
 import MyEvents from "../pages/MyEvents.vue";
@@ -14,7 +13,6 @@ import LeaderboardPage from "../pages/LeaderboardPage.vue";
 const routes = [
   { path: "/login", component: Login },
   { path: "/register", component: Register },
-  { path: "/auth/callback", component: AuthCallback },
   { path: "/mission-vision", component: MissionVision },
   { path: "/profile", component: Profile },
   { path: "/my-events", component: MyEvents },
