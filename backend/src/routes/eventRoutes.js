@@ -230,9 +230,12 @@ router.post("/:eventId/request-modification", authenticateToken, async (req, res
 // GET eventi con modifiche in attesa (per admin e reviewer)
 router.get("/pending-modifications", authenticateToken, async (req, res) => {
   try {
-    // Verifica che l'utente sia admin o reviewer
-    if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'reviewer')) {
-      return res.status(403).json({ error: 'Accesso negato: solo admin e reviewer possono vedere le modifiche in attesa' });
+    // Modalità sviluppo: bypassa controllo ruolo
+    if (!(process.env.NODE_ENV === 'development' && req.headers['x-dev-bypass'] === 'true')) {
+      // Verifica che l'utente sia admin o reviewer
+      if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'reviewer')) {
+        return res.status(403).json({ error: 'Accesso negato: solo admin e reviewer possono vedere le modifiche in attesa' });
+      }
     }
     
     const events = await Event.find({ hasPendingModifications: true })

@@ -50,6 +50,12 @@ export const authenticateToken = (req, res, next) => {
 };
 
 export const requireReviewerOrAdmin = (req, res, next) => {
+  // Modalità sviluppo: bypassa controllo ruolo
+  if (process.env.NODE_ENV === 'development' && req.headers['x-dev-bypass'] === 'true') {
+    console.log('🔧 DEV MODE: Bypassing role check for reviewer/admin');
+    return next();
+  }
+  
   if (!req.user || (req.user.role !== 'reviewer' && req.user.role !== 'admin')) {
     return res.status(403).json({ error: 'Accesso negato: ruolo non autorizzato' });
   }

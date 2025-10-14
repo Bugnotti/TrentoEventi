@@ -88,13 +88,7 @@ export const validateEvent = [
   body('link')
     .optional()
     .isURL()
-    .withMessage('Link non valido')
-    .custom((value) => {
-      if (value && !value.match(/^https:\/\/(www\.)?instagram\.com\//)) {
-        throw new Error('Il link deve essere un URL Instagram valido');
-      }
-      return true;
-    }),
+    .withMessage('Link non valido'),
   
   body('reporterInstagram')
     .optional()
